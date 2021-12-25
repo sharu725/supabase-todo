@@ -1,19 +1,25 @@
 <script>
   import supabase from "$lib/db";
+  import Todo from "$lib/Todo.svelte";
   import { onMount } from "svelte";
 
   let todos = [];
-  let newTask;
+  let newTask = "";
+
   onMount(async () => {
     await getAllTodos();
   });
 
   const getAllTodos = async () => {
-    let { data, error } = await supabase.from("todos").select("*");
-    todos = data;
+    try {
+      let { data, error } = await supabase.from("todos").select("*");
+      todos = data;
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const addTodo = async (task) => {
+  const addNewTodo = async () => {
     try {
       const { data, error } = await supabase
         .from("todos")
@@ -25,9 +31,9 @@
     }
   };
 
-  const updateTodoTask = async (todo) => {
+  const updateTodo = async (todo) => {
     try {
-      const { data: todoData, error } = await supabase
+      const { data, error } = await supabase
         .from("todos")
         .update({ task: todo.task, isComplete: todo.isComplete })
         .eq("id", todo.id);
@@ -36,7 +42,6 @@
       console.log(err);
     }
   };
-
   const deleteTodo = async (todo) => {
     try {
       const { data, error } = await supabase
@@ -49,61 +54,29 @@
     }
   };
 
-  const handleKeydown = (e) => {
-    if (e.key === "Enter" && newTask !== "") {
-      addTodo(newTask);
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" && newTask !== "") {
+      addNewTodo();
     }
   };
 </script>
 
-{#await todos}
-  <p>Loading...</p>
-{:then todos}
-  <div class="add-todo">
-    <input type="text" bind:value={newTask} />
-    <button on:click={() => addTodo(newTask)}>Add</button>
-  </div>
+<div class="add-todo">
+  <input type="text" bind:value={newTask} />
+  <button on:click={() => addNewTodo()}>Add Task</button>
+</div>
 
-  {#each todos as todo}
-    <div class="todo">
-      <input
-        type="checkbox"
-        checked={todo.isComplete}
-        on:change={(e) => {
-          todo.isComplete = e.currentTarget.checked;
-          updateTodoTask(todo);
-        }}
-      />
-      <input
-        type="text"
-        name="task"
-        class:complete={todo.isComplete}
-        value={todo.task}
-        on:change={(e) => {
-          todo.task = e.currentTarget.value;
-          updateTodoTask(todo);
-        }}
-      />
-      <button class="delete" on:click={() => deleteTodo(todo)}>X</button>
-    </div>
-  {:else}
-    <p>No todos found</p>
-  {/each}
-{/await}
+{#each todos as todo}
+  <Todo {todo} {updateTodo} {deleteTodo} />
+{:else}
+  <p>No todos found</p>
+{/each}
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window on:keypress={handleKeyPress} />
 
 <style>
-  .complete {
-    text-decoration: line-through;
-  }
-  .add-todo,
-  .todo {
+  .add-todo {
     display: flex;
-    margin-bottom: 0.25em;
-  }
-  .delete {
-    color: red;
-    /* font-weight: bold; */
+    margin-bottom: 0.5em;
   }
 </style>
