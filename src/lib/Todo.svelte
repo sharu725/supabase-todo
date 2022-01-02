@@ -2,7 +2,7 @@
   export let todo, updateTodo, deleteTodo;
 </script>
 
-<div class="todos">
+<div class="todos" class:done={todo.isComplete}>
   <input
     type="checkbox"
     checked={todo.isComplete}
@@ -28,5 +28,11 @@
   .todos {
     display: flex;
     margin-bottom: 0.25em;
+  }
+  .done {
+    opacity: 0.4;
+  }
+  .done input[type="text"] {
+    text-decoration: line-through;
   }
 </style>
