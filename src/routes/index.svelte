@@ -1,8 +1,6 @@
 <script>
   import { goto } from "$app/navigation";
-
-  import supabase from "$lib/db";
-  import { user } from "$lib/stores";
+  import { supabase, user } from "$lib/db";
   import Todo from "$lib/Todo.svelte";
   import { onMount } from "svelte";
 
@@ -69,11 +67,9 @@
 
   const logOut = async () => {
     const { error } = await supabase.auth.signOut();
-    $user = false;
     goto("/login");
   };
 
-  $: console.log("stored", $user);
 </script>
 
 <h4>Welcome {$user?.email ? $user.email : ""}!</h4>

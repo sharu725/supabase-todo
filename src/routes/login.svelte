@@ -1,6 +1,5 @@
 <script>
-  import supabase from "$lib/db";
-  import { user } from "$lib/stores";
+  import { supabase, user } from "$lib/db";
   import { goto } from "$app/navigation";
 
   let email = "";
@@ -13,8 +12,6 @@
     });
 
     console.error(error);
-
-    // $user = userDetails;
     goto("/");
   };
   const logIn = async () => {
@@ -22,13 +19,8 @@
       email: email,
       password: "iHyWfEdsXWDoAgSEjePT",
     });
-
-    console.error(error);
-
-    // $user = userDetails;
     goto("/");
   };
-  
 </script>
 
 {#if $user?.email}
@@ -57,5 +49,4 @@
     display: block;
     margin-bottom: 1em;
   }
-
 </style>

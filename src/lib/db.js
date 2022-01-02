@@ -1,8 +1,15 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
+import { readable } from "svelte/store";
 
-const supabase = createClient(
+export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
-)
+);
 
-export default supabase
+export const user = readable(supabase.auth.user(), (set) => {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event == "SIGNED_OUT") {
+      set(null);
+    }
+  });
+});
