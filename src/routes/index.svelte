@@ -1,5 +1,8 @@
 <script>
+  import { goto } from "$app/navigation";
+
   import supabase from "$lib/db";
+  import { user } from "$lib/stores";
   import Todo from "$lib/Todo.svelte";
   import { onMount } from "svelte";
 
@@ -23,7 +26,7 @@
     try {
       const { data, error } = await supabase
         .from("todos")
-        .insert([{ task: newTask }]);
+        .insert([{ task: newTask, user_id: $user.id }]);
       await getAllTodos();
       newTask = "";
     } catch (err) {
@@ -59,7 +62,17 @@
       addNewTodo();
     }
   };
+
+  const logOut = async () => {
+    let { error } = await supabase.auth.signOut();
+    $user = false;
+    goto("/login");
+  };
+
+  $: console.log($user);
 </script>
+
+<h4>Welcome {$user?.email ? $user.email : ""}!</h4>
 
 <div class="add-todo">
   <input type="text" bind:value={newTask} />
@@ -72,11 +85,23 @@
   <p>No todos found</p>
 {/each}
 
+{#if $user.email}
+  <p on:click={logOut} class="switch">Logout</p>
+{/if}
 <svelte:window on:keypress={handleKeyPress} />
 
 <style>
   .add-todo {
     display: flex;
     margin-bottom: 0.5em;
+  }
+
+  :global(.switch) {
+    color: lightskyblue;
+    cursor: pointer;
+  }
+
+  :global(.switch:hover) {
+    text-decoration: underline;
   }
 </style>
